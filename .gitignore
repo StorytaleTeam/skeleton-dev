@@ -1,0 +1,7 @@
+*.local.php
+/vendor
+/.idea
+/config/.env
+/runtime/*
+!/runtime/**/empty
+!/runtime/Doctrine/Migrations/
