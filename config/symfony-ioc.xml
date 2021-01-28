@@ -26,13 +26,30 @@
         <parameter type="string" key="doctrine.orm.configuration.proxyDir">%kernel.project_dir%/runtime/Doctrine/Proxies</parameter>
         <parameter type="string" key="doctrine.cache.adapter.class">%env(DOCTRINE_CACHE_ADAPTER_CLASS)%</parameter>
         <!-- Doctrine end -->
+
+        <!-- EventBus -->
+        <parameter type="collection" key="eventBus.amqp.connection">
+            <parameter type="string" key="host">%env(AMQP_CONNECTION_HOST)%</parameter>
+            <parameter type="string" key="port">%env(AMQP_CONNECTION_PORT)%</parameter>
+            <parameter type="string" key="vhost">%env(AMQP_CONNECTION_VHOST)%</parameter>
+            <parameter type="string" key="login">%env(AMQP_CONNECTION_LOGIN)%</parameter>
+            <parameter type="string" key="password">%env(AMQP_CONNECTION_PASSWORD)%</parameter>
+        </parameter>
+
+        <parameter type="collection" key="eventBus.amqp.exchangeConfig">
+            <parameter type="string" key="name">storytaleMessageBus</parameter>
+            <parameter type="string" key="type">fanout</parameter>
+            <parameter type="collection" key="arguments"/>
+            <parameter type="binary" key="flags">2</parameter>
+        </parameter>
+        <!-- EventBus end -->
     </parameters>
 
     <services>
         <!-- Doctrine start -->
         <service id="doctrine.metadata.driver" class="Doctrine\ORM\Mapping\Driver\XmlDriver">
             <argument type="collection">
-                <argument>%kernel.project_dir%/src/PortAdapters/Secondary/Persistence/Doctrine/Mapping/Order</argument>
+                <argument>%kernel.project_dir%/src/PortAdapters/Secondary/Order/Persistence/Doctrine/Mapping/</argument>
             </argument>
         </service>
 
@@ -94,6 +111,43 @@
         </service>
         <!-- Doctrine end -->
 
+        <!-- EventBus -->
+        <service id="amqp.connection" class="AMQPConnection">
+            <argument>%eventBus.amqp.connection%</argument>
+        </service>
+
+        <service id="storytale.portAdapters.secondary.eventBus.rabbitMQ.rabbitMQEventBusPublisher" class="Storytale\PortAdapters\Secondary\EventBus\RabbitMQ\RabbitMQEventBusPublisher">
+            <argument>%eventBus.amqp.exchangeConfig%</argument>
+            <argument type="service" id="amqp.connection"/>
+        </service>
+
+        <service id="storytale.portAdapters.secondary.eventBus.rabbitMQ.rabbitMQEventBusSubscriber" class="Storytale\PortAdapters\Secondary\EventBus\RabbitMQ\RabbitMQEventBusSubscriber">
+            <argument type="collection">
+                <argument key="name">%env(AMQP_QUEUE_NAME)%</argument>
+                <argument key="flags">%env(AMQP_QUEUE_FLAGS)%</argument>
+            </argument>
+            <argument>%eventBus.amqp.exchangeConfig%</argument>
+            <argument type="service" id="amqp.connection"/>
+        </service>
+
+        <service id="storytale.contracts.sharedEvents.eventHandlersMap" class="Storytale\Contracts\SharedEvents\EventHandlersMap" public="true">
+            <argument type="collection">
+<!--                <argument key="inventory.illustration.illustrationWasCreated" type="service" id="storytale.statistic.application.command.illustrationLog.externalEvent.onIllustrationWasCreatedHandler"/>-->
+            </argument>
+        </service>
+
+        <service id="storytale.contracts.sharedEvents.eventsMap" class="Storytale\Contracts\SharedEvents\EventsMap" public="true">
+            <argument type="collection">
+<!--                <argument key="inventory.illustration.illustrationWasCreated">Storytale\Contracts\SharedEvents\Illustration\IllustrationWasCreated</argument>-->
+            </argument>
+        </service>
+
+        <service id="storytale.portAdapters.secondary.eventBus.storytaleEventBus" class="Storytale\PortAdapters\Secondary\EventBus\StorytaleEventBus" public="true">
+            <argument type="service" id="storytale.portAdapters.secondary.eventBus.rabbitMQ.rabbitMQEventBusPublisher"/>
+            <argument type="service" id="storytale.portAdapters.secondary.eventBus.rabbitMQ.rabbitMQEventBusSubscriber"/>
+        </service>
+        <!-- EventBus end -->
+
         <service id="AuraPgSQLQueryFactory" class="Aura\SqlQuery\QueryFactory">
             <argument type="string">pgsql</argument>
         </service>
@@ -151,7 +205,7 @@
 
         <service id="RestAPI\Controller\TestController" class="RestAPI\Controller\TestController" public="true">
             <argument type="service" id="storytale.skeletonDev.application.command.testOrder.testOrderService"/>
-            <argument type="service" id="storytale.skeletonDev.portAdapters.secondary.order.querying.aura.auraSearchOrderService"/>
+            <argument type="service" id="storytale.skeletonDev.portAdapters.secondary.order.querying.aura.auraOrderDataProvider"/>
         </service>
         <!--Controllers end-->
 
@@ -163,7 +217,7 @@
         <!-- Command end -->
 
         <!-- Query start -->
-        <service id="storytale.skeletonDev.portAdapters.secondary.order.querying.aura.auraSearchOrderService" class="Storytale\SkeletonDev\PortAdapters\Secondary\Order\Querying\Aura\AuraSearchOrderService">
+        <service id="storytale.skeletonDev.portAdapters.secondary.order.querying.aura.auraOrderDataProvider" class="Storytale\SkeletonDev\PortAdapters\Secondary\Order\Querying\Aura\AuraOrderDataProvider">
             <argument type="service" id="storytale.portAdapters.secondary.dataBase.sql.storytaleTeam.storytalePdoConnection"/>
             <argument type="service" id="AuraPgSQLQueryFactory"/>
         </service>

@@ -2,7 +2,7 @@
 
 namespace Storytale\SkeletonDev\Application\Query\TestOrder;
 
-interface SearchOrderService
+interface OrderDataProvider
 {
     public function find(int $id);
 }

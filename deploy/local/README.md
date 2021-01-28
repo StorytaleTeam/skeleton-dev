@@ -5,4 +5,9 @@
 4. Далее в консоли запускаем команду `sh up.sh`
 5. Заходим в fpm контейнер : `docker exec -it fpm.inventory bash` и запускаем
   `php /www/vendor/bin/doctrine-migrations migrations:migrate`
+  
+  
+ Последовательность создания новго сервиса
+ 1)/config/.env.dist
+ 2) названия сервисов в deploy/local/docker-compose.yml
 

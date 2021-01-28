@@ -17,7 +17,7 @@ $realPath = realpath(dirname(__DIR__));
 
 include $realPath . '/vendor/autoload.php';
 
-if (file_exists($realPath . '/deploy/.env')) {
+if (file_exists($realPath . '/config/.env')) {
     (new Dotenv(true))->loadEnv($realPath . '/config/.env');
 }
 

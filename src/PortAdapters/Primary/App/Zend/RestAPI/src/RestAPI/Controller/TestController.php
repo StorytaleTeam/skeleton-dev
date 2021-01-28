@@ -3,7 +3,7 @@
 namespace RestAPI\Controller;
 
 use Storytale\SkeletonDev\Application\Command\TestOrder\TestOrderService;
-use Storytale\SkeletonDev\Application\Query\TestOrder\SearchOrderService;
+use Storytale\SkeletonDev\Application\Query\TestOrder\OrderDataProvider;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\JsonModel;
 
@@ -12,13 +12,13 @@ class TestController extends AbstractActionController
     /** @var TestOrderService */
     private TestOrderService $testOrderService;
 
-    /** @var SearchOrderService */
-    private SearchOrderService $searchOrderService;
+    /** @var OrderDataProvider */
+    private OrderDataProvider $orderDataProvider;
 
-    public function __construct(TestOrderService $orderService, SearchOrderService $searchOrderService)
+    public function __construct(TestOrderService $orderService, OrderDataProvider $orderDataProvider)
     {
         $this->testOrderService = $orderService;
-        $this->searchOrderService = $searchOrderService;
+        $this->orderDataProvider = $orderDataProvider;
     }
 
     public function indexAction()
@@ -43,7 +43,7 @@ class TestController extends AbstractActionController
 
     public function findByIdAction()
     {
-        $response = $this->searchOrderService->find(1);
+        $response = $this->orderDataProvider->find(1);
 
         return new JsonModel([
             'success' => true,
