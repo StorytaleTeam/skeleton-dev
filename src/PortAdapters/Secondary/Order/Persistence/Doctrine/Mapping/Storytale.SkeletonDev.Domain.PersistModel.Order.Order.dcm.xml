@@ -4,9 +4,9 @@
         <id name="id" type="integer" column="id">
             <generator strategy="IDENTITY"/>
         </id>
-        <field name="customerId" type="integer" column="customer_id" nullable="false"/>
-        <field name="productId" type="integer" column="product_id" nullable="false"/>
-        <field name="createdDate" type="datetime" column="created_date" nullable="false"/>
+        <field name="customerId" type="integer" column="customer_id"/>
+        <field name="productId" type="integer" column="product_id"/>
+        <field name="createdDate" type="datetime" column="created_date"/>
         <field name="soldDate" type="datetime" column="sold_date" nullable="true"/>
     </entity>
 </doctrine-mapping>
